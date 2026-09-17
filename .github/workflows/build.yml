@@ -1,0 +1,42 @@
+name: Build and verify Brickbox
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            package: win
+          - os: macos-latest
+            package: mac
+          - os: ubuntu-latest
+            package: linux
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run package:${{ matrix.package }}
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - run: npm run package:win:installer
+        if: matrix.package == 'win'
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: brickbox-${{ matrix.package }}
+          path: |
+            release/*.exe
+            release/*.zip
+            release/*.dmg
+            release/*.AppImage
+            release/*.deb

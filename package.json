@@ -1,0 +1,45 @@
+{
+  "name": "brickbox",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Tiny games. Big nostalgia. An original monochrome handheld arcade.",
+  "author": "Brickbox",
+  "license": "MIT",
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "test:browser": "node scripts/check-browser.mjs",
+    "desktop": "npm run build && electron .",
+    "package:linux": "npm run build && electron-builder --linux",
+    "package:win": "npm run build && electron-builder --win zip",
+    "package:mac": "npm run build && electron-builder --mac",
+    "format": "prettier --write src tests scripts desktop",
+    "format:check": "prettier --check src tests scripts desktop",
+    "test:desktop": "node scripts/check-desktop.mjs",
+    "package:win:installer": "npm run build && electron-builder --win nsis",
+    "test:offline": "node scripts/check-browser.mjs --production"
+  },
+  "dependencies": {
+    "lucide-react": "^1.47.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "electron": "^44.4.1",
+    "electron-builder": "^26.15.3",
+    "prettier": "^3.9.7",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  },
+  "desktopName": "brickbox.desktop"
+}
