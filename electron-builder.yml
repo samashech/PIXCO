@@ -1,6 +1,6 @@
-appId: games.brickbox.desktop
-productName: Brickbox
-copyright: Copyright © 2026 Brickbox contributors
+appId: games.pixco.desktop
+productName: Pixco
+copyright: Copyright © 2026 Pixco contributors
 asar: true
 directories:
   output: release
@@ -10,7 +10,7 @@ files:
   - desktop/*.cjs
   - package.json
 icon: public/icon.png
-artifactName: Brickbox-${version}-${os}-${arch}.${ext}
+artifactName: Pixco-${version}-${os}-${arch}.${ext}
 win:
   target:
     - nsis

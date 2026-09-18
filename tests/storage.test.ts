@@ -81,3 +81,74 @@ describe("persistence", () => {
     expect(reloaded.store.get().stats["003"].highScore).toBe(300);
   });
 });
+
+describe("difficulty records", () => {
+  it("remembers selections and isolates Easy, Normal, and Hard scores", () => {
+    const run = {
+      score: 100,
+      level: 2,
+      lives: 0,
+      status: "over" as const,
+      elapsed: 5,
+    };
+    store.difficulty("001", "hard");
+    store.begin("001", "hard");
+    store.record("001", run, "hard-run", "hard");
+    store.begin("001", "easy");
+    store.record("001", { ...run, score: 9999 }, "easy-run", "easy");
+    expect(store.get().difficulties["001"]).toBe("hard");
+    expect(store.get().records["001"].hard?.highScore).toBe(100);
+    expect(store.get().records["001"].easy?.highScore).toBe(9999);
+    expect(
+      store.get().history.find((s) => s.id === "hard-run")?.difficulty,
+    ).toBe("hard");
+    store.reset("statistics");
+    expect(store.get().records["001"].hard?.highScore).toBe(100);
+    expect(store.get().records["001"].hard?.played).toBe(0);
+    store.reset("scores");
+    expect(store.get().records["001"].hard?.highScore).toBe(0);
+  });
+  it("migrates legacy scores and sessions to Normal once without losing favorites", async () => {
+    backing.set(
+      STORAGE_KEY,
+      JSON.stringify({
+        favorites: ["002"],
+        settings: { theme: "amber" },
+        stats: {
+          "001": {
+            highScore: 450,
+            bestLevel: 3,
+            played: 2,
+            completed: 1,
+            seconds: 20,
+            lastPlayed: new Date().toISOString(),
+          },
+        },
+        history: [
+          {
+            id: "old",
+            gameId: "001",
+            score: 450,
+            level: 3,
+            seconds: 20,
+            completed: true,
+            date: new Date().toISOString(),
+          },
+        ],
+      }),
+    );
+    vi.resetModules();
+    const first = await import("../src/storage/store");
+    expect(first.store.get().records["001"].normal?.highScore).toBe(450);
+    expect(first.store.get().records["001"].easy).toBeUndefined();
+    expect(first.store.get().favorites).toEqual(["002"]);
+    expect(first.store.get().history[0].difficulty).toBe("normal");
+    expect(first.store.get().settings.theme).toBe("amber");
+    first.store.settings({ appearance: "paper" });
+    vi.resetModules();
+    const again = await import("../src/storage/store");
+    expect(again.store.get().records["001"].normal?.played).toBe(2);
+    expect(again.store.get().settings.appearance).toBe("paper");
+    expect(again.store.get().schemaVersion).toBe(2);
+  });
+});

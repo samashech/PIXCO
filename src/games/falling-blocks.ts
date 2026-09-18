@@ -1,3 +1,4 @@
+import { blockRules } from "./difficulty";
 import { BaseGame } from "./engine/base";
 import type { GameFrame, Input, Pixel } from "./engine/types";
 export const SHAPES = [
@@ -89,7 +90,8 @@ export class FallingBlocks extends BaseGame {
     if (cleared) {
       this.score([0, 100, 300, 500, 800][cleared] * this.state.level);
       this.lines += cleared;
-      const level = 1 + Math.floor(this.lines / 10);
+      const level =
+        1 + Math.floor(this.lines / blockRules[this.difficulty].linesPerLevel);
       if (level > this.state.level) this.sound("level");
       this.state.level = level;
     }
@@ -98,7 +100,11 @@ export class FallingBlocks extends BaseGame {
   }
   step(dt: number) {
     this.tick += dt;
-    const speed = Math.max(0.09, 0.72 - (this.state.level - 1) * 0.055);
+    const rules = blockRules[this.difficulty];
+    const speed = Math.max(
+      rules.minFall,
+      rules.fall - (this.state.level - 1) * rules.acceleration,
+    );
     if (this.tick >= speed) {
       this.tick -= speed;
       this.drop();

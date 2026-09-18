@@ -1,3 +1,4 @@
+import { shooterRules } from "./difficulty";
 import { BaseGame } from "./engine/base";
 import type { GameFrame, Input, Pixel } from "./engine/types";
 import { alien, ship, sprite } from "./engine/sprites";
@@ -10,6 +11,7 @@ export class SpaceShooter extends BaseGame {
   private fireTime = 0;
   private cooldown = 0;
   init() {
+    this.state.lives = shooterRules[this.difficulty].lives;
     this.x = 7;
     this.bullets = [];
     this.enemyBullets = [];
@@ -20,14 +22,17 @@ export class SpaceShooter extends BaseGame {
   }
   private wave() {
     this.enemies = [];
-    for (let y = 1; y < 10; y += 4)
+    for (let y = 1; y < 1 + shooterRules[this.difficulty].rows * 4; y += 4)
       for (let x = 1; x < 14; x += 5) this.enemies.push({ x, y });
   }
   step(dt: number) {
+    const rules = shooterRules[this.difficulty];
     this.tick += dt;
     this.fireTime += dt;
     this.cooldown = Math.max(0, this.cooldown - dt);
-    if (this.tick > Math.max(0.12, 0.65 - this.state.level * 0.05)) {
+    if (
+      this.tick > Math.max(rules.minMove, rules.move - this.state.level * 0.05)
+    ) {
       this.tick = 0;
       const edge = this.enemies.some(
         (e) => e.x + this.direction < 0 || e.x + this.direction > 13,
@@ -39,7 +44,8 @@ export class SpaceShooter extends BaseGame {
       }
     }
     for (const b of this.bullets) b.y -= dt * 22;
-    for (const b of this.enemyBullets) b.y += dt * (8 + this.state.level);
+    for (const b of this.enemyBullets)
+      b.y += dt * (rules.bullet + this.state.level);
     this.bullets = this.bullets.filter((b) => {
       const i = this.enemies.findIndex(
         (e) => b.x >= e.x && b.x <= e.x + 2 && b.y >= e.y && b.y <= e.y + 3,
@@ -60,7 +66,8 @@ export class SpaceShooter extends BaseGame {
       return b.y < 24;
     });
     if (
-      this.fireTime > Math.max(0.35, 1.2 - this.state.level * 0.06) &&
+      this.fireTime >
+        Math.max(rules.minFire, rules.fire - this.state.level * 0.06) &&
       this.enemies.length
     ) {
       this.fireTime = 0;

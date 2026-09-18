@@ -1,3 +1,4 @@
+import { appearances, appearanceIds, lcdOverrides } from "../themes/catalog";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "../components/Icon";
 import { Preview } from "../components/Preview";
@@ -83,6 +84,12 @@ export function Settings() {
         ].includes(e.code)
       )
         return;
+      if (e.code === "KeyF" || e.code === "F11") {
+        setMessage(
+          "F is reserved for LCD fullscreen; F11 is application fullscreen.",
+        );
+        return;
+      }
       const old = Object.entries(settings.mappings).find(
         ([input, code]) => code === e.code && input !== mapping,
       );
@@ -106,7 +113,7 @@ export function Settings() {
     const url = URL.createObjectURL(blob),
       a = document.createElement("a");
     a.href = url;
-    a.download = "brickbox-settings.json";
+    a.download = "pixco-settings.json";
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     setMessage("Settings exported.");
@@ -114,12 +121,64 @@ export function Settings() {
   return (
     <div className="settings-page">
       <div className="settings-main">
+        <section className="settings-panel appearance-panel">
+          <div className="settings-title">
+            <Icon name="Layers" />
+            <h2>Materials & appearance</h2>
+            <span>SIX EDITIONS. ONE HANDHELD.</span>
+          </div>
+          <div className="appearance-picker">
+            {appearanceIds.map((id) => {
+              const appearance = appearances[id];
+              return (
+                <button
+                  key={id}
+                  aria-pressed={settings.appearance === id}
+                  className={settings.appearance === id ? "selected" : ""}
+                  onClick={() => update({ appearance: id, theme: "auto" })}
+                  style={
+                    {
+                      "--sample-body": appearance.tokens["device-body"],
+                      "--sample-screen": appearance.lcd.background,
+                      "--sample-ink": appearance.lcd.foreground,
+                      "--sample-button": appearance.tokens["action-a"],
+                    } as React.CSSProperties
+                  }
+                >
+                  <span className="appearance-sample">
+                    <i className="sample-screen">▦</i>
+                    <i className="sample-pad">✚</i>
+                    <i className="sample-button" />
+                  </span>
+                  <b>{appearance.name}</b>
+                  <span>{appearance.description}</span>
+                  {settings.appearance === id && (
+                    <Icon name="Check" size={14} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </section>
         <section className="settings-panel">
           <div className="settings-title">
             <Icon name="SlidersHorizontal" />
             <h2>Display</h2>
             <span>THE LCD, YOUR WAY</span>
           </div>
+          <label className="setting-row">
+            <div>
+              <b>LCD tint follows the material</b>
+              <p>You can override the screen palette below.</p>
+            </div>
+            <button
+              className="secondary-button"
+              aria-pressed={settings.theme === "auto"}
+              onClick={() => update({ theme: "auto" })}
+            >
+              {settings.theme === "auto" ? "Linked" : "Use theme tint"}
+            </button>
+          </label>
           <div className="theme-picker">
             {(["green", "gray", "amber", "dark"] as const).map((theme) => (
               <button
@@ -127,7 +186,15 @@ export function Settings() {
                 className={settings.theme === theme ? "selected" : ""}
                 onClick={() => update({ theme })}
               >
-                <i className={`theme-swatch swatch-${theme}`}>▦</i>
+                <i
+                  className={`theme-swatch swatch-${theme}`}
+                  style={{
+                    background: lcdOverrides[theme].background,
+                    color: lcdOverrides[theme].foreground,
+                  }}
+                >
+                  ▦
+                </i>
                 <span>
                   {theme === "green"
                     ? "Classic green"

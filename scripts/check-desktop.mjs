@@ -4,11 +4,11 @@ import path from "node:path";
 const launch = () =>
   electron.launch({
     ...(process.argv.includes("--packaged")
-      ? { executablePath: path.resolve("release/linux-unpacked/brickbox") }
+      ? { executablePath: path.resolve("release/linux-unpacked/pixco") }
       : {}),
     args: [
       "--no-sandbox",
-      "--user-data-dir=/tmp/brickbox-native-check",
+      "--user-data-dir=/tmp/pixco-native-check",
       ...(process.argv.includes("--packaged") ? [] : [path.resolve(".")]),
     ],
     timeout: 30000,
@@ -18,8 +18,8 @@ try {
   app = await launch();
   const page = await app.firstWindow();
   await page.locator(".lcd-screen.powered").waitFor();
-  assert.match(await page.title(), /BRICKBOX/);
-  await page.evaluate(() => localStorage.removeItem("brickbox.v1"));
+  assert.match(await page.title(), /PIXCO/);
+  await page.evaluate(() => localStorage.removeItem("pixco.v1"));
   await page.reload();
   await page.locator(".lcd-screen.powered").waitFor();
   await page.keyboard.press("Enter");
@@ -32,7 +32,7 @@ try {
     .first()
     .click();
   const before = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem("brickbox.v1")),
+    JSON.parse(localStorage.getItem("pixco.v1")),
   );
   assert.ok(before.stats["001"].highScore > 0);
   await app.evaluate(({ BrowserWindow }) =>
@@ -52,7 +52,7 @@ try {
   });
   await page.waitForTimeout(250);
   assert.match(await page.locator(".lcd-overlay").textContent(), /PAUSED/);
-  await page.screenshot({ path: "/tmp/brickbox-native.png" });
+  await page.screenshot({ path: "/tmp/pixco-native.png" });
   await page.evaluate(() => {
     window.dispatchEvent(new Event("pagehide"));
   });
@@ -65,7 +65,7 @@ try {
   const restored = await app.firstWindow();
   await restored.locator(".lcd-screen.powered").waitFor();
   const after = await restored.evaluate(() =>
-    JSON.parse(localStorage.getItem("brickbox.v1")),
+    JSON.parse(localStorage.getItem("pixco.v1")),
   );
   assert.ok(after.favorites.includes("001"));
   assert.ok(after.stats["001"].highScore >= before.stats["001"].highScore);

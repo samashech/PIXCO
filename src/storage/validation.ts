@@ -1,3 +1,4 @@
+import { appearanceIds } from "../themes/catalog";
 import { defaults, type Settings } from "./settings";
 import type { Input } from "../games/engine/types";
 export function parseSettings(text: string): Settings {
@@ -5,7 +6,7 @@ export function parseSettings(text: string): Settings {
   try {
     value = JSON.parse(text);
   } catch {
-    throw new Error("Choose a valid Brickbox JSON settings file.");
+    throw new Error("Choose a valid Pixco JSON settings file.");
   }
   if (
     !value ||
@@ -16,11 +17,12 @@ export function parseSettings(text: string): Settings {
     !value.settings ||
     typeof value.settings !== "object"
   )
-    throw new Error("This is not a supported Brickbox settings file.");
+    throw new Error("This is not a supported Pixco settings file.");
   const source = value.settings as Record<string, unknown>;
   const result: Settings = { ...defaults, mappings: { ...defaults.mappings } };
   const enums = {
-    theme: ["green", "gray", "amber", "dark"],
+    appearance: appearanceIds,
+    theme: ["auto", "green", "gray", "amber", "dark"],
     effect: ["off", "classic", "authentic"],
     density: ["comfortable", "compact"],
     screenScaling: ["integer", "fit"],
@@ -73,6 +75,8 @@ export function parseSettings(text: string): Settings {
         )
       )
         throw new Error(`Invalid key for ${key}.`);
+      if (code === "KeyF" || code === "F11")
+        throw new Error("F and F11 are reserved for fullscreen.");
       result.mappings[key] = code;
     }
     if (

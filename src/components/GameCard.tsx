@@ -1,5 +1,12 @@
+import { difficultyLabel } from "../games/difficulty";
 import type { GameDefinition } from "../games/engine/types";
-import { store, useStore, formatScore } from "../storage/store";
+import {
+  store,
+  useStore,
+  formatScore,
+  gameStats,
+  selectedDifficulty,
+} from "../storage/store";
 import { Icon } from "./Icon";
 import { Preview } from "./Preview";
 export function GameCard({
@@ -9,7 +16,9 @@ export function GameCard({
   game: GameDefinition;
   onSelect: (id: string) => void;
 }) {
-  const { favorites, stats } = useStore();
+  const data = useStore();
+  const { favorites, stats } = data;
+  const difficulty = selectedDifficulty(data, game.id);
   return (
     <article className="game-card">
       <button
@@ -40,12 +49,12 @@ export function GameCard({
         </button>
         <div className="card-meta">
           <span>
-            <i className={`difficulty ${game.difficulty.toLowerCase()}`} />
-            {game.difficulty}
+            <i className={`difficulty ${difficulty}`} />
+            {difficultyLabel[difficulty]}
           </span>
           <span title="High score">
             <Icon name="Trophy" size={12} />
-            {formatScore(stats[game.id]?.highScore ?? 0)}
+            {formatScore(gameStats(data, game.id).highScore)}
           </span>
         </div>
         {stats[game.id]?.lastPlayed && (

@@ -1,3 +1,4 @@
+import { resolveLCD } from "../themes/catalog";
 import { useEffect, useRef } from "react";
 import { previewFrame } from "../games/previews";
 import type { GameDefinition } from "../games/engine/types";
@@ -6,18 +7,28 @@ import { useStore } from "../storage/store";
 export function Preview({ game }: { game: GameDefinition }) {
   const canvas = useRef<HTMLCanvasElement>(null),
     { settings } = useStore();
+  const palette = resolveLCD(settings);
   useEffect(() => {
     if (canvas.current)
       renderLCD(
         canvas.current,
         previewFrame(game),
-        settings.theme,
+        palette,
         settings.effect,
         8,
       );
-  }, [game, settings.theme, settings.effect]);
+  }, [game, palette.background, palette.foreground, settings.effect]);
   return (
-    <div className="game-preview" data-theme={settings.theme}>
+    <div
+      className="game-preview"
+      data-theme={settings.theme}
+      style={
+        {
+          "--lcd-background": palette.background,
+          "--lcd-pixel": palette.foreground,
+        } as React.CSSProperties
+      }
+    >
       <div className="preview-lcd">
         <canvas ref={canvas} aria-label={`${game.title} LCD preview`} />
         <div className="preview-readout">

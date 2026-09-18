@@ -1,3 +1,4 @@
+import { isDifficulty, type Difficulty } from "../games/difficulty";
 import { useSyncExternalStore } from "react";
 import { defaultMappings } from "../input/controls";
 import type { Snapshot } from "../games/engine/types";
@@ -16,6 +17,7 @@ export interface Stats {
 export interface Session {
   id: string;
   gameId: string;
+  difficulty: Difficulty;
   score: number;
   level: number;
   seconds: number;
@@ -23,6 +25,9 @@ export interface Session {
   completed: boolean;
 }
 export interface Data {
+  schemaVersion: 2;
+  difficulties: Record<string, Difficulty>;
+  records: Record<string, Partial<Record<Difficulty, Stats>>>;
   settings: Settings;
   favorites: string[];
   recent: string[];
@@ -31,6 +36,9 @@ export interface Data {
   selected: string;
 }
 const emptyData = (): Data => ({
+  schemaVersion: 2,
+  difficulties: {},
+  records: {},
   settings: { ...defaults, mappings: { ...defaultMappings } },
   favorites: [],
   recent: [],
@@ -46,7 +54,38 @@ export const emptyStats: Stats = {
   seconds: 0,
   lastPlayed: "",
 };
-export const STORAGE_KEY = "brickbox.v1";
+function sanitizeStats(value: unknown): Stats {
+  const stats = { ...emptyStats };
+  if (!value || typeof value !== "object") return stats;
+  const source = value as Record<string, unknown>;
+  for (const key of [
+    "highScore",
+    "bestLevel",
+    "played",
+    "completed",
+    "seconds",
+  ] as const)
+    if (
+      typeof source[key] === "number" &&
+      Number.isFinite(source[key]) &&
+      source[key] >= 0
+    )
+      stats[key] = source[key];
+  if (
+    typeof source.lastPlayed === "string" &&
+    !Number.isNaN(Date.parse(source.lastPlayed))
+  )
+    stats.lastPlayed = source.lastPlayed;
+  return stats;
+}
+export const selectedDifficulty = (data: Data, id: string): Difficulty =>
+  data.difficulties[id] ?? "normal";
+export const gameStats = (
+  data: Data,
+  id: string,
+  difficulty: Difficulty = selectedDifficulty(data, id),
+): Stats => data.records[id]?.[difficulty] ?? emptyStats;
+export const STORAGE_KEY = "pixco.v1";
 let storageAvailable = true;
 function read(): Data {
   try {
@@ -79,30 +118,32 @@ function read(): Data {
     }
     if (parsed.stats && typeof parsed.stats === "object")
       for (const [id, value] of Object.entries(parsed.stats)) {
-        if (!/^\d{3}$/.test(id) || !value || typeof value !== "object")
-          continue;
-        const source = value as Record<string, unknown>,
-          stats = { ...emptyStats };
-        for (const key of [
-          "highScore",
-          "bestLevel",
-          "played",
-          "completed",
-          "seconds",
-        ] as const)
-          if (
-            typeof source[key] === "number" &&
-            Number.isFinite(source[key]) &&
-            source[key] >= 0
-          )
-            stats[key] = source[key];
-        if (
-          typeof source.lastPlayed === "string" &&
-          !Number.isNaN(Date.parse(source.lastPlayed))
-        )
-          stats.lastPlayed = source.lastPlayed;
-        clean.stats[id] = stats;
+        if (/^\d{3}$/.test(id)) clean.stats[id] = sanitizeStats(value);
       }
+    if (parsed.difficulties && typeof parsed.difficulties === "object")
+      for (const [id, value] of Object.entries(parsed.difficulties)) {
+        if (/^\d{3}$/.test(id) && isDifficulty(value))
+          clean.difficulties[id] = value;
+      }
+    if (parsed.schemaVersion === 2) {
+      if (parsed.records && typeof parsed.records === "object")
+        for (const [id, value] of Object.entries(parsed.records)) {
+          if (!/^\d{3}$/.test(id) || !value || typeof value !== "object")
+            continue;
+          clean.records[id] = {};
+          for (const [difficulty, stats] of Object.entries(value))
+            if (isDifficulty(difficulty))
+              clean.records[id][difficulty] = sanitizeStats(stats);
+        }
+    } else {
+      // Legacy runs used the original rules, now called Normal. Never copy them to Easy or Hard.
+      clean.records = Object.fromEntries(
+        Object.entries(clean.stats).map(([id, stats]) => [
+          id,
+          { normal: { ...stats } },
+        ]),
+      );
+    }
     if (Array.isArray(parsed.history))
       clean.history = parsed.history
         .filter((entry: unknown): entry is Session => {
@@ -123,6 +164,12 @@ function read(): Data {
             )
           );
         })
+        .map((entry: Session) => ({
+          ...entry,
+          difficulty: isDifficulty(entry.difficulty)
+            ? entry.difficulty
+            : ("normal" as const),
+        }))
         .slice(0, 200);
     return clean;
   } catch {
@@ -153,6 +200,11 @@ export const store = {
   },
   settings: (settings: Partial<Settings>) =>
     write({ ...data, settings: { ...data.settings, ...settings } }),
+  difficulty: (id: string, difficulty: Difficulty) =>
+    write({
+      ...data,
+      difficulties: { ...data.difficulties, [id]: difficulty },
+    }),
   select: (id: string) => write({ ...data, selected: id }),
   favorite: (id: string) =>
     write({
@@ -161,10 +213,22 @@ export const store = {
         ? data.favorites.filter((x) => x !== id)
         : [...data.favorites, id],
     }),
-  begin: (id: string) => {
+  begin: (id: string, difficulty: Difficulty = "normal") => {
+    const record = gameStats(data, id, difficulty);
     const stats = data.stats[id] ?? emptyStats;
     write({
       ...data,
+      records: {
+        ...data.records,
+        [id]: {
+          ...data.records[id],
+          [difficulty]: {
+            ...record,
+            played: record.played + 1,
+            lastPlayed: new Date().toISOString(),
+          },
+        },
+      },
       recent: [id, ...data.recent.filter((x) => x !== id)].slice(0, 20),
       stats: {
         ...data.stats,
@@ -176,13 +240,20 @@ export const store = {
       },
     });
   },
-  record: (id: string, snapshot: Snapshot, sessionId: string) => {
+  record: (
+    id: string,
+    snapshot: Snapshot,
+    sessionId: string,
+    difficulty: Difficulty = "normal",
+  ) => {
+    const record = gameStats(data, id, difficulty);
     const old = data.stats[id] ?? emptyStats,
       previous = data.history.find((s) => s.id === sessionId),
       completed = snapshot.status === "over";
     const session: Session = {
       id: sessionId,
       gameId: id,
+      difficulty,
       score: snapshot.score,
       level: snapshot.level,
       seconds: snapshot.elapsed,
@@ -191,6 +262,22 @@ export const store = {
     };
     write({
       ...data,
+      records: {
+        ...data.records,
+        [id]: {
+          ...data.records[id],
+          [difficulty]: {
+            ...record,
+            highScore: Math.max(record.highScore, snapshot.score),
+            bestLevel: Math.max(record.bestLevel, snapshot.level),
+            seconds:
+              record.seconds +
+              Math.max(0, snapshot.elapsed - (previous?.seconds ?? 0)),
+            completed:
+              record.completed + (completed && !previous?.completed ? 1 : 0),
+          },
+        },
+      },
       stats: {
         ...data.stats,
         [id]: {
@@ -215,6 +302,17 @@ export const store = {
     if (kind === "scores")
       write({
         ...data,
+        records: Object.fromEntries(
+          Object.entries(data.records).map(([id, records]) => [
+            id,
+            Object.fromEntries(
+              Object.entries(records).map(([difficulty, s]) => [
+                difficulty,
+                { ...s, highScore: 0, bestLevel: 1 },
+              ]),
+            ),
+          ]),
+        ),
         stats: Object.fromEntries(
           Object.entries(data.stats).map(([id, s]) => [
             id,
@@ -227,6 +325,21 @@ export const store = {
         ...data,
         history: [],
         recent: [],
+        records: Object.fromEntries(
+          Object.entries(data.records).map(([id, records]) => [
+            id,
+            Object.fromEntries(
+              Object.entries(records).map(([difficulty, s]) => [
+                difficulty,
+                {
+                  ...emptyStats,
+                  highScore: s.highScore,
+                  bestLevel: s.bestLevel,
+                },
+              ]),
+            ),
+          ]),
+        ),
         stats: Object.fromEntries(
           Object.entries(data.stats).map(([id, s]) => [
             id,

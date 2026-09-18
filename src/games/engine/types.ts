@@ -1,3 +1,4 @@
+import type { Difficulty } from "../difficulty";
 export type Input =
   | "up"
   | "down"
@@ -32,6 +33,7 @@ export interface Snapshot {
 }
 export interface GameEngine {
   state: Snapshot;
+  readonly difficulty: Difficulty;
   init(): void;
   update(dt: number): void;
   render(): GameFrame;
@@ -46,9 +48,11 @@ export interface GameDefinition {
   title: string;
   shortDescription: string;
   category: string;
-  difficulty: "Easy" | "Medium" | "Hard";
   tags: string[];
   controls: { key: string; action: string }[];
   version: string;
-  create: (sound?: (name: Sound) => void) => GameEngine;
+  create: (
+    sound?: (name: Sound) => void,
+    difficulty?: Difficulty,
+  ) => GameEngine;
 }

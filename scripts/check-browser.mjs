@@ -3,10 +3,10 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 const production = process.argv.includes("--production");
 const url =
-  process.env.BRICKBOX_URL ||
+  process.env.PIXCO_URL ||
   (production ? "http://127.0.0.1:4173" : "http://127.0.0.1:5173");
 const executable =
-  process.env.BRICKBOX_BROWSER ||
+  process.env.PIXCO_BROWSER ||
   (existsSync("/usr/bin/brave") ? "/usr/bin/brave" : undefined);
 const browser = await chromium.launch({
   executablePath: executable,
@@ -44,7 +44,7 @@ try {
   }
   await page.locator(".lcd-screen.powered").waitFor();
   await page.waitForTimeout(350);
-  await page.screenshot({ path: "/tmp/brickbox-desktop.png", fullPage: true });
+  await page.screenshot({ path: "/tmp/pixco-desktop.png", fullPage: true });
   assert.equal(await page.locator(".game-card").count(), 10);
   await page.keyboard.press("Enter");
   await page.waitForTimeout(150);
@@ -56,7 +56,7 @@ try {
   await page.waitForTimeout(150);
   assert.match(await page.locator(".lcd-overlay").textContent(), /PAUSED/);
   const saved = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem("brickbox.v1")),
+    JSON.parse(localStorage.getItem("pixco.v1")),
   );
   assert.ok(saved.stats["001"].highScore > 0);
   await page.keyboard.press("KeyR");
@@ -157,14 +157,14 @@ try {
   );
   await page.getByRole("checkbox", { name: /Mute sound/ }).check();
   assert.equal(
-    (await page.evaluate(() => JSON.parse(localStorage.getItem("brickbox.v1"))))
+    (await page.evaluate(() => JSON.parse(localStorage.getItem("pixco.v1"))))
       .settings.muted,
     true,
   );
   await page.getByRole("button", { name: "Remap a", exact: true }).click();
   await page.keyboard.press("KeyQ");
   assert.equal(
-    (await page.evaluate(() => JSON.parse(localStorage.getItem("brickbox.v1"))))
+    (await page.evaluate(() => JSON.parse(localStorage.getItem("pixco.v1"))))
       .settings.mappings.a,
     "KeyQ",
   );
@@ -172,7 +172,7 @@ try {
     page.waitForEvent("download"),
     page.getByRole("button", { name: "Export settings" }).click(),
   ]);
-  assert.equal(download.suggestedFilename(), "brickbox-settings.json");
+  assert.equal(download.suggestedFilename(), "pixco-settings.json");
   await page.locator("input[type=file]").setInputFiles({
     name: "invalid.json",
     mimeType: "application/json",
@@ -189,7 +189,7 @@ try {
   assert.equal(await page.locator(".lcd-overlay.ready").count(), 1);
   await page.getByRole("textbox", { name: "Search games" }).fill("");
   await page.setViewportSize({ width: 768, height: 1024 });
-  await page.screenshot({ path: "/tmp/brickbox-tablet.png", fullPage: true });
+  await page.screenshot({ path: "/tmp/pixco-tablet.png", fullPage: true });
   assert.ok(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -197,7 +197,7 @@ try {
     "tablet no horizontal overflow",
   );
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.screenshot({ path: "/tmp/brickbox-mobile.png", fullPage: true });
+  await page.screenshot({ path: "/tmp/pixco-mobile.png", fullPage: true });
   assert.ok(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -208,10 +208,10 @@ try {
     .getByRole("button", { name: "Start / pause", exact: false })
     .first()
     .count();
-  await page.screenshot({ path: "/tmp/brickbox-mobile-viewport.png" });
+  await page.screenshot({ path: "/tmp/pixco-mobile-viewport.png" });
   await page.getByRole("button", { name: "Settings", exact: true }).click();
   await page.screenshot({
-    path: "/tmp/brickbox-settings-mobile.png",
+    path: "/tmp/pixco-settings-mobile.png",
     fullPage: true,
   });
   assert.ok(

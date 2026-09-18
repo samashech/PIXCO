@@ -1,6 +1,7 @@
+import { difficulties, difficultyLabel } from "../games/difficulty";
 import { Icon } from "../components/Icon";
 import { games, getGame } from "../games/registry";
-import { useStore, formatScore, formatTime } from "../storage/store";
+import { useStore, formatScore, formatTime, gameStats } from "../storage/store";
 export function Statistics({ select }: { select: (id: string) => void }) {
   const data = useStore();
   const totalSeconds = Object.values(data.stats).reduce(
@@ -34,7 +35,9 @@ export function Statistics({ select }: { select: (id: string) => void }) {
           <thead>
             <tr>
               <th>GAME</th>
-              <th>HIGH SCORE</th>
+              {difficulties.map((d) => (
+                <th key={d}>{difficultyLabel[d].toUpperCase()} BEST</th>
+              ))}
               <th>BEST LEVEL</th>
               <th>PLAYS</th>
               <th>TIME</th>
@@ -48,7 +51,11 @@ export function Statistics({ select }: { select: (id: string) => void }) {
                     {g.id} <b>{g.title}</b>
                   </button>
                 </td>
-                <td>{formatScore(data.stats[g.id]?.highScore ?? 0)}</td>
+                {difficulties.map((d) => (
+                  <td key={d}>
+                    {formatScore(gameStats(data, g.id, d).highScore)}
+                  </td>
+                ))}
                 <td>{data.stats[g.id]?.bestLevel ?? "—"}</td>
                 <td>{data.stats[g.id]?.played ?? 0}</td>
                 <td>{formatTime(data.stats[g.id]?.seconds ?? 0)}</td>
@@ -63,6 +70,7 @@ export function Statistics({ select }: { select: (id: string) => void }) {
           {data.history.slice(0, 30).map((s) => (
             <div key={s.id}>
               <b>{getGame(s.gameId).title}</b>
+              <span>{difficultyLabel[s.difficulty]}</span>
               <span>{new Date(s.date).toLocaleString()}</span>
               <span>{formatTime(s.seconds)}</span>
               <strong>{formatScore(s.score)} PTS</strong>

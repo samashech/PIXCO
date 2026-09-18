@@ -95,7 +95,7 @@ export function Brand({ small = false }: { small?: boolean }) {
         />
       </svg>
       <span>
-        BRICKBOX<span className="brand-dot">™</span>
+        PIXCO<span className="brand-dot">™</span>
       </span>
     </div>
   );

@@ -1,7 +1,18 @@
+import {
+  difficulties,
+  difficultyLabel,
+  difficultyNotes,
+} from "../games/difficulty";
 import { Icon } from "./Icon";
 import { Handheld, type GameCommand } from "./Handheld";
 import { games } from "../games/registry";
-import { store, useStore, formatScore } from "../storage/store";
+import {
+  store,
+  useStore,
+  formatScore,
+  gameStats,
+  selectedDifficulty,
+} from "../storage/store";
 import type { GameDefinition } from "../games/engine/types";
 import type { Page } from "../navigation";
 export function PlayArea({
@@ -17,6 +28,7 @@ export function PlayArea({
 }) {
   const data = useStore();
   const showConsole = true;
+  const difficulty = selectedDifficulty(data, game.id);
   return (
     <>
       {" "}
@@ -34,7 +46,7 @@ export function PlayArea({
                 <>
                   Small screen.
                   <br />
-                  Endless <em>possibilities.</em>
+                  One more <em>try.</em>
                 </>
               ) : (
                 game.title
@@ -55,6 +67,28 @@ export function PlayArea({
                 game.shortDescription
               )}
             </p>
+            <div className="run-settings">
+              <label htmlFor="game-difficulty">DIFFICULTY</label>
+              <select
+                id="game-difficulty"
+                aria-label="Difficulty"
+                value={difficulty}
+                onChange={(event) =>
+                  store.difficulty(
+                    game.id,
+                    event.target.value as typeof difficulty,
+                  )
+                }
+              >
+                {difficulties.map((value) => (
+                  <option key={value} value={value}>
+                    {difficultyLabel[value]}
+                  </option>
+                ))}
+              </select>
+              <p>{difficultyNotes[game.id][difficulty]}</p>
+              <small>Changing difficulty resets the run.</small>
+            </div>
             <div className="hero-buttons">
               <button
                 className="primary-button"
@@ -150,15 +184,12 @@ export function PlayArea({
             </span>
             <button
               className="fullscreen-button"
-              onClick={() => {
-                const hero = document.querySelector(".hero");
-                if (document.fullscreenElement) void document.exitFullscreen();
-                else if (hero?.requestFullscreen)
-                  void hero.requestFullscreen().catch(() => {});
-              }}
+              onClick={() =>
+                window.dispatchEvent(new Event("pixco:lcd-fullscreen"))
+              }
               aria-label="Fullscreen game"
             >
-              <Icon name="Expand" size={13} />
+              <Icon name="Expand" size={15} /> Fullscreen <kbd>F</kbd>
             </button>
             <button onClick={() => navigate("settings")}>
               All controls <Icon name="ChevronRight" size={13} />
@@ -180,9 +211,11 @@ export function PlayArea({
             </div>
           </div>
           <div>
-            <span className="eyebrow">PERSONAL BEST</span>
+            <span className="eyebrow">
+              PERSONAL BEST · {difficulty.toUpperCase()}
+            </span>
             <b className="large-score">
-              {formatScore(data.stats[game.id]?.highScore ?? 0)}
+              {formatScore(gameStats(data, game.id).highScore)}
             </b>
             <button
               className="secondary-button"

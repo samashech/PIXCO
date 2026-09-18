@@ -1,8 +1,10 @@
+import type { Appearance } from "../themes/catalog";
 import { defaultMappings } from "../input/controls";
 import type { Input } from "../games/engine/types";
 import type { LCDEffect, LCDTheme } from "../lcd/renderer";
 export interface Settings {
-  theme: LCDTheme;
+  appearance: Appearance;
+  theme: LCDTheme | "auto";
   effect: LCDEffect;
   master: number;
   sfx: number;
@@ -19,7 +21,8 @@ export interface Settings {
   mappings: Record<Input, string>;
 }
 export const defaults: Settings = {
-  theme: "green",
+  appearance: "classic",
+  theme: "auto",
   effect: "classic",
   master: 0.35,
   sfx: 0.7,

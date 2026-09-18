@@ -1,0 +1,625 @@
+/* Color, type, and material values are supplied by catalog.ts. Layout stays shared. */
+:root {
+  color: var(--text);
+  background: var(--background);
+  font-family: var(--font-ui);
+  color-scheme: dark;
+}
+:root[data-appearance="paper"],
+:root[data-appearance="toy-store"] {
+  color-scheme: light;
+}
+body {
+  background: var(--background);
+  color: var(--text);
+}
+.sidebar {
+  background: var(--sidebar-bg);
+}
+.topbar {
+  background: var(--background);
+}
+h1,
+h2,
+h3,
+.brand {
+  font-family: var(--font-display);
+}
+.nav-item {
+  color: var(--text-muted);
+}
+.nav-item.active {
+  color: var(--text);
+  background: var(--surface-secondary);
+}
+.nav-item.active:before {
+  background: var(--accent);
+}
+.nav-item:hover {
+  background: var(--surface);
+}
+.nav-count,
+.game-number,
+.feature-classic {
+  color: var(--text);
+  background: var(--surface-secondary);
+  border-color: var(--border);
+}
+.brand,
+.breadcrumb b,
+.card-title,
+.section-heading h2,
+.setting-row b,
+.settings-title h2 {
+  color: var(--text);
+}
+.brand svg {
+  color: var(--accent);
+}
+:is(
+  .hero,
+  .game-card,
+  .settings-panel,
+  .settings-preview,
+  .offline-note,
+  .stat-card,
+  .game-detail-bar
+) {
+  background: var(--surface);
+  border-color: var(--border);
+  border-radius: var(--panel-radius);
+  box-shadow: none;
+}
+.hero {
+  min-height: 550px;
+}
+.hero-copy {
+  padding-top: 32px;
+  padding-left: 32px;
+}
+.hero-copy h2 {
+  font-size: 36px;
+  letter-spacing: -1px;
+  font-weight: 600;
+  margin: 18px 0;
+}
+.hero-copy h2 em {
+  color: var(--text);
+  font-style: normal;
+}
+.hero-copy > p {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.hero-copy .hero-buttons {
+  margin-top: 18px;
+}
+.hero-console {
+  background: none;
+}
+.orbit {
+  display: none;
+}
+.hero-label {
+  color: var(--accent);
+}
+.hero-features {
+  margin-bottom: 20px;
+}
+.hero-bottom {
+  color: var(--text-dim);
+}
+.game-card:hover {
+  transform: none;
+  border-color: var(--accent);
+}
+.card-art {
+  background: var(--lcd-background, var(--surface-secondary));
+}
+.card-category,
+.card-category > span:last-child {
+  font-size: 8px;
+  color: var(--text-muted);
+}
+.card-meta {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+.last-played {
+  font-size: 8px;
+  color: var(--text-muted);
+}
+.category-tabs button {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.category-tabs button.selected {
+  background: var(--surface-secondary);
+  color: var(--text);
+  border-color: var(--border);
+}
+.primary-button {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 1px solid var(--accent);
+  box-shadow:
+    0 2px 0 var(--button-shadow),
+    inset 0 1px var(--highlight);
+  border-radius: 3px;
+}
+.primary-button:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+  filter: brightness(1.08);
+}
+.text-button,
+.icon-button {
+  color: var(--text-muted);
+}
+.text-button:hover,
+.icon-button:hover {
+  color: var(--text);
+}
+.secondary-button,
+.mapping-item button {
+  background: var(--surface-secondary);
+  color: var(--text);
+  border-color: var(--border);
+  border-radius: 3px;
+}
+.secondary-button:hover {
+  background: var(--surface-secondary);
+  filter: brightness(1.08);
+}
+.search-box,
+select {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+.search-box input {
+  color: var(--text);
+  font-size: 11px;
+}
+.search-box input::placeholder {
+  color: var(--text-muted);
+}
+.controls-strip {
+  color: var(--text-muted);
+}
+.control-keys kbd {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+.hero .device {
+  background: var(--device-body);
+  border: 1px solid var(--device-edge);
+  border-radius: var(--device-radius);
+  box-shadow:
+    inset 2px 2px 1px var(--highlight),
+    inset -2px -3px 2px var(--shadow),
+    4px 7px 0 var(--device-shadow),
+    8px 13px 15px var(--shadow);
+  transform: rotate(-2deg);
+}
+.hero .device.device-playing,
+.game-hero .device {
+  transform: none;
+}
+.device:after {
+  opacity: 0.07;
+}
+.device-heading > span:first-child,
+.device-model,
+.device-subtitle,
+.device-footer > div:first-child,
+.utility-controls span,
+.action-buttons span,
+.battery-spec {
+  color: var(--device-print);
+}
+.device-heading > span:first-child {
+  font-family: var(--font-display);
+  font-style: normal;
+}
+.screen-bezel {
+  background: var(--bezel);
+  border-color: var(--device-shadow);
+  border-radius: 9px;
+  box-shadow:
+    inset 1px 3px 4px var(--shadow),
+    0 1px 0 var(--highlight);
+}
+.utility-controls .hardware-button,
+.dpad .hardware-button,
+.dpad-base,
+.dpad-center {
+  background: var(--button-face);
+  color: var(--button-ink);
+  border-color: var(--button-shadow);
+}
+.utility-controls .hardware-button {
+  box-shadow:
+    inset 0 1px var(--highlight),
+    0 2px 0 var(--button-shadow);
+}
+.dpad {
+  filter: drop-shadow(0 3px 0 var(--button-shadow));
+}
+.dpad-center:after {
+  border-color: var(--button-shadow);
+  box-shadow: inset 0 1px 2px var(--shadow);
+}
+.dpad .hardware-button:hover {
+  color: var(--button-ink);
+}
+.action-buttons .hardware-button {
+  background: var(--action-a);
+  color: var(--action-ink);
+  border: 1px solid var(--device-edge);
+  box-shadow:
+    0 3px 0 var(--button-shadow),
+    0 4px 3px var(--shadow),
+    inset 0 1px var(--highlight);
+}
+.action-buttons .b {
+  background: var(--action-b);
+}
+.speaker i,
+.screw {
+  background: var(--button-shadow);
+  box-shadow: 0 1px 0 var(--device-edge);
+}
+.screw:after {
+  background: var(--device-edge);
+}
+.power-led {
+  background: var(--accent);
+  box-shadow: none;
+}
+:is(.lcd-screen, .game-preview) {
+  background: var(--lcd-background) !important;
+  color: var(--lcd-pixel);
+  border-color: color-mix(in srgb, var(--lcd-pixel) 45%, transparent);
+}
+.lcd-screen {
+  box-shadow: inset 1px 2px 3px
+    color-mix(in srgb, var(--lcd-pixel) 25%, transparent);
+}
+.board-wrap {
+  border-color: color-mix(in srgb, var(--lcd-pixel) 45%, transparent);
+}
+.preview-lcd,
+.preview-corner {
+  color: var(--lcd-pixel);
+}
+.game-preview {
+  box-shadow: inset 0 1px 5px
+    color-mix(in srgb, var(--lcd-pixel) 10%, transparent);
+}
+.lcd-screen .lcd-overlay,
+.lcd-screen .lcd-overlay.ready {
+  background: color-mix(in srgb, var(--lcd-background) 90%, transparent);
+  color: var(--lcd-pixel);
+}
+.lcd-overlay button:hover {
+  color: var(--lcd-pixel);
+  background: color-mix(in srgb, var(--lcd-pixel) 10%, transparent);
+}
+.favorite-button {
+  color: var(--text);
+}
+.game-card .favorite-button {
+  background: var(--surface);
+  border-radius: 2px;
+  color: var(--text);
+}
+.favorite-button:hover,
+.favorite-button.is-favorite {
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+.card-play {
+  background: var(--button-face);
+  color: var(--button-ink);
+}
+.difficulty {
+  background: var(--easy);
+}
+.difficulty.normal {
+  background: var(--normal);
+}
+.difficulty.hard {
+  background: var(--hard);
+}
+.toggle {
+  background: var(--surface-secondary);
+  border: 1px solid var(--border);
+}
+.toggle:before {
+  background: var(--text-muted);
+  top: 2px;
+}
+.toggle:checked {
+  background: var(--accent);
+}
+.toggle:checked:before {
+  background: var(--accent-ink);
+}
+.theme-picker .selected,
+.appearance-picker .selected {
+  border-color: var(--accent);
+  background: var(--surface-secondary);
+}
+.theme-picker button > span {
+  color: var(--text);
+}
+.theme-picker svg {
+  color: var(--text);
+}
+.settings-message {
+  background: var(--surface-secondary);
+  color: var(--text);
+  border-color: var(--border);
+  backdrop-filter: none;
+}
+.confirm-reset {
+  background: var(--surface-secondary);
+  color: var(--text);
+}
+.reset-buttons button {
+  color: var(--text-muted);
+}
+.range-control input {
+  accent-color: var(--accent);
+}
+.appearance-picker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.appearance-picker > button {
+  border: 1px solid var(--border);
+  border-radius: var(--panel-radius);
+  background: var(--background);
+  text-align: left;
+  padding: 14px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  align-items: flex-start;
+}
+.appearance-picker > button > b {
+  font: 600 12px var(--font-ui);
+  color: var(--text);
+}
+.appearance-picker > button > span:last-of-type {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.appearance-picker > button > svg {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: var(--text);
+}
+.appearance-sample {
+  height: 70px;
+  width: 47px;
+  border-radius: 5px;
+  background: var(--sample-body);
+  display: block;
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--sample-body) 60%, black);
+  box-shadow: 2px 3px 0 var(--shadow);
+}
+.sample-screen {
+  position: absolute;
+  inset: 7px 6px auto;
+  height: 33px;
+  background: var(--sample-screen);
+  color: var(--sample-ink);
+  border: 3px solid color-mix(in srgb, var(--sample-body) 50%, black);
+  font: 21px monospace;
+  text-align: center;
+  line-height: 26px;
+}
+.sample-pad {
+  position: absolute;
+  left: 7px;
+  bottom: 7px;
+  font-size: 16px;
+  color: color-mix(in srgb, var(--sample-body) 25%, black);
+}
+.sample-button {
+  width: 10px;
+  height: 10px;
+  background: var(--sample-button);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 11px;
+  right: 7px;
+}
+[data-appearance="electronic"] :is(.hero, .settings-panel, .offline-note) {
+  border-width: 2px;
+  border-style: groove;
+}
+.device-annotation {
+  color: var(--text-dim);
+}
+[data-appearance="electronic"] .device-heading {
+  border: 1px solid var(--device-shadow);
+  padding: 5px;
+  margin-top: -5px;
+  box-shadow: inset 0 1px var(--device-edge);
+}
+[data-appearance="electronic"] .device-subtitle {
+  border-top: 2px solid var(--device-shadow);
+  padding-top: 6px;
+  letter-spacing: 0.2px;
+}
+[data-appearance="electronic"] .screen-bezel {
+  border-radius: 3px;
+}
+[data-appearance="electronic"] .brand {
+  letter-spacing: -1.5px;
+}
+[data-appearance="toy-store"] .hero {
+  border-top: 4px solid var(--action-a);
+}
+[data-appearance="toy-store"] .device-heading {
+  border-bottom: 3px solid var(--action-a);
+  padding-bottom: 6px;
+}
+[data-appearance="toy-store"] .device-subtitle {
+  border-bottom: 3px solid var(--action-b);
+  padding-bottom: 6px;
+}
+[data-appearance="toy-store"] .device:after {
+  opacity: 0.03;
+}
+[data-appearance="toy-store"] .brand svg {
+  color: var(--action-a);
+}
+[data-appearance="toy-store"] .action-buttons .hardware-button {
+  border-width: 2px;
+}
+[data-appearance="industrial"] .hero .device {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent 0 2px,
+    var(--material-line) 2px 3px
+  );
+}
+[data-appearance="industrial"] .device:after {
+  display: none;
+}
+[data-appearance="industrial"] .screen-bezel {
+  border-radius: 2px;
+  border: 2px solid var(--device-edge);
+}
+[data-appearance="industrial"] .device-annotation {
+  display: none;
+}
+[data-appearance="industrial"] .device-heading {
+  letter-spacing: 2px;
+}
+[data-appearance="industrial"] .hero-copy h2 {
+  font-weight: 450;
+}
+[data-appearance="paper"] .hero {
+  border: 1px solid var(--text-muted);
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent 0 3px,
+    var(--shadow) 3px 3.15px
+  );
+}
+[data-appearance="paper"] .hero-copy h2 {
+  font-weight: 400;
+  letter-spacing: -0.8px;
+}
+[data-appearance="paper"] .screen-bezel {
+  border: 1px solid var(--device-print);
+}
+[data-appearance="paper"] .device-annotation {
+  font-size: 8px;
+  color: var(--text-muted);
+}
+[data-appearance="paper"] .page-heading {
+  border-bottom: 2px solid var(--text);
+  padding-bottom: 20px;
+}
+[data-appearance="paper"] .card-category {
+  font-family: var(--font-mono);
+}
+[data-appearance="paper"] .game-card {
+  border-style: dashed;
+}
+[data-appearance="paper"] .hero .device {
+  box-shadow:
+    inset 1px 1px var(--device-edge),
+    3px 6px 0 var(--device-shadow),
+    5px 8px 0 var(--shadow);
+}
+[data-appearance="terminal"] .brand {
+  font-size: 21px;
+  letter-spacing: -1px;
+}
+[data-appearance="terminal"] .hero-copy h2 {
+  font-size: 30px;
+  letter-spacing: -1px;
+}
+[data-appearance="terminal"] .hero-label:before {
+  content: "> ";
+  color: var(--accent);
+}
+[data-appearance="terminal"] .device-annotation,
+[data-appearance="terminal"] .offline-icon {
+  display: none;
+}
+[data-appearance="terminal"] .device:after {
+  display: none;
+}
+[data-appearance="terminal"] .screen-bezel {
+  border-radius: 0;
+}
+[data-appearance="terminal"] .hero .device {
+  box-shadow: 4px 6px 0 var(--device-shadow);
+}
+[data-appearance="terminal"] .nav-item {
+  border-radius: 0;
+}
+[data-appearance="terminal"] .section-heading h2 {
+  font-size: 19px;
+  font-weight: 400;
+}
+@media (max-width: 760px) {
+  .appearance-picker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .hero-copy {
+    padding: 25px 25px 55px;
+  }
+  .hero-copy h2 {
+    font-size: 33px;
+  }
+  .hero {
+    min-height: 0;
+  }
+  .hero-console {
+    background: none;
+  }
+  .game-hero .hero-copy h2 {
+    font-size: 29px;
+  }
+}
+@media (max-width: 520px) {
+  .sidebar {
+    background: var(--sidebar-bg);
+    backdrop-filter: none;
+  }
+  .appearance-picker > button {
+    padding: 12px;
+  }
+  .appearance-picker > button > b {
+    font-size: 11px;
+  }
+  .hero-copy {
+    padding-bottom: 55px;
+  }
+  .hero-console {
+    padding-bottom: 10px;
+  }
+  .game-preview {
+    height: 139px;
+  }
+}
+/* Apply these after material selectors: immersive mode contains only the LCD. */
+.lcd-stage.immersive .lcd-screen {
+  box-shadow: none;
+  border-radius: 0;
+}

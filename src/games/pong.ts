@@ -1,3 +1,4 @@
+import { pongRules } from "./difficulty";
 import { BaseGame } from "./engine/base";
 import type { GameFrame, Input, Pixel } from "./engine/types";
 export class Pong extends BaseGame {
@@ -6,11 +7,15 @@ export class Pong extends BaseGame {
   ball = { x: 8, y: 12 };
   velocity = { x: 3.1, y: 7 };
   private aiTick = 0;
+  get rules() {
+    return pongRules[this.difficulty];
+  }
   init() {
+    this.state.lives = this.rules.lives;
     this.paddle = 6;
     this.opponent = 6;
     this.ball = { x: 8, y: 12 };
-    this.velocity = { x: 3.1, y: 7 };
+    this.velocity = { x: 3.1, y: this.rules.ball };
     this.aiTick = 0;
   }
   step(dt: number) {
@@ -19,10 +24,10 @@ export class Pong extends BaseGame {
     const oldY = this.ball.y;
     this.ball.x += this.velocity.x * dt;
     this.ball.y += this.velocity.y * dt;
-    if (this.aiTick > 0.12) {
+    if (this.aiTick > this.rules.aiInterval) {
       this.aiTick = 0;
       const target = this.ball.x - 1.5;
-      if (Math.abs(target - this.opponent) > 1.5)
+      if (Math.abs(target - this.opponent) > this.rules.aiTolerance)
         this.opponent = Math.max(
           0,
           Math.min(12, this.opponent + Math.sign(target - this.opponent)),
@@ -37,11 +42,12 @@ export class Pong extends BaseGame {
       oldY < 22 &&
       this.ball.y >= 22 &&
       this.ball.x >= this.paddle - 0.5 &&
-      this.ball.x <= this.paddle + 3.5
+      this.ball.x <= this.paddle + this.rules.paddle - 0.5
     ) {
       this.ball.y = 21.9;
-      this.velocity.y = -(8 + this.state.level);
-      this.velocity.x = (this.ball.x - this.paddle - 1.5) * 4;
+      this.velocity.y = -(this.rules.ball + 1 + this.state.level);
+      this.velocity.x =
+        (this.ball.x - this.paddle - (this.rules.paddle - 1) / 2) * 4;
       this.sound("click");
     }
     if (
@@ -59,7 +65,7 @@ export class Pong extends BaseGame {
       this.score(100);
       this.state.level = 1 + Math.floor(this.state.score / 300);
       this.ball = { x: 8, y: 12 };
-      this.velocity = { x: 3.1, y: 7 + this.state.level };
+      this.velocity = { x: 3.1, y: this.rules.ball + this.state.level };
     }
     if (this.ball.y > 24) {
       this.state.lives--;
@@ -67,13 +73,14 @@ export class Pong extends BaseGame {
       else {
         this.sound("lose");
         this.ball = { x: 8, y: 12 };
-        this.velocity = { x: 3.1, y: 7 };
+        this.velocity = { x: 3.1, y: this.rules.ball };
       }
     }
   }
   input(input: Input) {
     if (input === "left") this.paddle = Math.max(0, this.paddle - 1);
-    if (input === "right") this.paddle = Math.min(12, this.paddle + 1);
+    if (input === "right")
+      this.paddle = Math.min(16 - this.rules.paddle, this.paddle + 1);
   }
   render(): GameFrame {
     const pixels: Pixel[] = Array.from({ length: 8 }, (_, i) => ({
@@ -81,11 +88,9 @@ export class Pong extends BaseGame {
       y: 12,
       shade: 0.15,
     }));
-    for (let i = 0; i < 4; i++)
-      pixels.push(
-        { x: this.paddle + i, y: 22 },
-        { x: this.opponent + i, y: 1 },
-      );
+    for (let i = 0; i < this.rules.paddle; i++)
+      pixels.push({ x: this.paddle + i, y: 22 });
+    for (let i = 0; i < 4; i++) pixels.push({ x: this.opponent + i, y: 1 });
     pixels.push({ x: Math.round(this.ball.x), y: Math.round(this.ball.y) });
     return { width: 16, height: 24, pixels };
   }

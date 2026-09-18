@@ -1,3 +1,4 @@
+import { dodgerRules } from "./difficulty";
 import { BaseGame } from "./engine/base";
 import type { GameFrame, Input, Pixel } from "./engine/types";
 export class Dodger extends BaseGame {
@@ -14,10 +15,15 @@ export class Dodger extends BaseGame {
     this.seconds = 0;
   }
   step(dt: number) {
+    const rules = dodgerRules[this.difficulty];
     this.tick += dt;
     this.seconds += dt;
-    for (const p of this.objects) p.y += dt * (5 + this.state.level * 0.7);
-    if (this.tick > Math.max(0.13, 0.7 - this.state.level * 0.03)) {
+    for (const p of this.objects)
+      p.y += dt * (rules.speed + this.state.level * 0.7);
+    if (
+      this.tick >
+      Math.max(rules.minSpawn, rules.spawn - this.state.level * 0.03)
+    ) {
       this.tick = 0;
       this.objects.push({ x: Math.floor(Math.random() * 14), y: -2 });
     }
@@ -37,7 +43,7 @@ export class Dodger extends BaseGame {
       }
       return true;
     });
-    this.state.level = 1 + Math.floor(this.seconds / 15);
+    this.state.level = 1 + Math.floor(this.seconds / rules.levelSeconds);
   }
   input(input: Input) {
     if (input === "left") this.x = Math.max(0, this.x - 1);

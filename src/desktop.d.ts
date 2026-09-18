@@ -1,6 +1,6 @@
 export {};
 declare global {
   interface Window {
-    brickboxDesktop?: { onPause: (callback: () => void) => () => void };
+    pixcoDesktop?: { onPause: (callback: () => void) => () => void };
   }
 }

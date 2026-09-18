@@ -1,4 +1,4 @@
-const CACHE = "brickbox-v1";
+const CACHE = "pixco-v1";
 self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
@@ -24,7 +24,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
       for (const name of await caches.keys())
-        if (name.startsWith("brickbox-") && name !== CACHE)
+        if (name.startsWith("pixco-") && name !== CACHE)
           await caches.delete(name);
       await self.clients.claim();
     })(),

@@ -1,3 +1,4 @@
+import { breakerRules, type Difficulty } from "./difficulty";
 import { BaseGame } from "./engine/base";
 import type { GameFrame, Input, Pixel } from "./engine/types";
 export class BrickBreaker extends BaseGame {
@@ -9,25 +10,30 @@ export class BrickBreaker extends BaseGame {
   constructor(
     sound?: ConstructorParameters<typeof BaseGame>[0],
     private moving = false,
+    difficulty: Difficulty = "normal",
   ) {
-    super(sound);
+    super(sound, difficulty);
+  }
+  get rules() {
+    return breakerRules[this.difficulty];
   }
   init() {
+    this.state.lives = this.rules.lives;
     this.paddle = 6;
     this.ball = { x: 8, y: 19 };
-    this.velocity = { x: 3.7, y: -7 };
+    this.velocity = { x: 3.7, y: -this.rules.ball };
     this.shifts = 0;
     this.fill();
   }
   private fill() {
     this.bricks = [];
-    for (let y = 2; y < 7; y++)
+    for (let y = 2; y < 2 + this.rules.rows; y++)
       for (let x = 1; x < 15; x++)
         if (!this.moving || (x + y) % 4 !== 0) this.bricks.push({ x, y });
   }
   private resetBall() {
-    this.ball = { x: this.paddle + 1.5, y: 20 };
-    this.velocity = { x: 3.7, y: -(7 + this.state.level) };
+    this.ball = { x: this.paddle + (this.rules.paddle - 1) / 2, y: 20 };
+    this.velocity = { x: 3.7, y: -(this.rules.ball + this.state.level) };
   }
   step(dt: number) {
     this.tick += dt;
@@ -47,12 +53,14 @@ export class BrickBreaker extends BaseGame {
       this.velocity.y > 0 &&
       old.y < 22 &&
       this.ball.y >= 22 &&
-      this.ball.x >= this.paddle - 0.6 &&
-      this.ball.x <= this.paddle + 3.6
+      this.ball.x >= this.paddle - this.rules.forgiveness &&
+      this.ball.x <=
+        this.paddle + this.rules.paddle - 1 + this.rules.forgiveness
     ) {
       this.ball.y = 21.9;
       this.velocity.y = -Math.abs(this.velocity.y);
-      this.velocity.x = (this.ball.x - (this.paddle + 1.5)) * 3.6;
+      this.velocity.x =
+        (this.ball.x - (this.paddle + (this.rules.paddle - 1) / 2)) * 3.6;
       if (Math.abs(this.velocity.x) < 1) this.velocity.x = 1;
       this.sound("click");
     }
@@ -80,16 +88,18 @@ export class BrickBreaker extends BaseGame {
       this.fill();
       this.resetBall();
     }
-    if (this.moving && this.shifts > 3) {
+    if (this.moving && this.shifts > this.rules.shift) {
       this.shifts = 0;
       this.bricks = this.bricks.map((b) => ({ ...b, x: (b.x + 1) % 16 }));
     }
   }
   input(input: Input) {
     if (input === "left") this.paddle = Math.max(0, this.paddle - 1);
-    if (input === "right") this.paddle = Math.min(12, this.paddle + 1);
+    if (input === "right")
+      this.paddle = Math.min(16 - this.rules.paddle, this.paddle + 1);
     if (input === "a") this.paddle = Math.max(0, this.paddle - 2);
-    if (input === "b") this.paddle = Math.min(12, this.paddle + 2);
+    if (input === "b")
+      this.paddle = Math.min(16 - this.rules.paddle, this.paddle + 2);
   }
   render(): GameFrame {
     return {
@@ -97,7 +107,10 @@ export class BrickBreaker extends BaseGame {
       height: 24,
       pixels: [
         ...this.bricks,
-        ...Array.from({ length: 4 }, (_, i) => ({ x: this.paddle + i, y: 22 })),
+        ...Array.from({ length: this.rules.paddle }, (_, i) => ({
+          x: this.paddle + i,
+          y: 22,
+        })),
         { x: Math.round(this.ball.x), y: Math.round(this.ball.y) },
       ],
     };

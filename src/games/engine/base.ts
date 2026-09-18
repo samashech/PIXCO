@@ -1,3 +1,4 @@
+import type { Difficulty } from "../difficulty";
 import type { GameEngine, GameFrame, Input, Snapshot, Sound } from "./types";
 export abstract class BaseGame implements GameEngine {
   state: Snapshot = {
@@ -8,7 +9,10 @@ export abstract class BaseGame implements GameEngine {
     elapsed: 0,
   };
   protected tick = 0;
-  constructor(protected sound: (name: Sound) => void = () => {}) {}
+  constructor(
+    protected sound: (name: Sound) => void = () => {},
+    public readonly difficulty: Difficulty = "normal",
+  ) {}
   abstract init(): void;
   abstract step(dt: number): void;
   abstract render(): GameFrame;

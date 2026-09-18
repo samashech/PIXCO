@@ -73,7 +73,7 @@ export function Sidebar({ page, navigate }: Props) {
           <span>Settings</span>
         </button>
         <div className="sidebar-version">
-          <span>BRICKBOX V1.0</span>
+          <span>PIXCO V1.0</span>
           <span>MADE TO PLAY ↗</span>
         </div>
       </div>

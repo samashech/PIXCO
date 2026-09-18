@@ -1,10 +1,11 @@
+import { snakeRules } from "./difficulty";
 import { BaseGame } from "./engine/base";
 import type { GameFrame, Input, Pixel } from "./engine/types";
 export class Snake extends BaseGame {
   body: Pixel[] = [];
   food: Pixel = { x: 3, y: 3 };
   direction: Pixel = { x: 1, y: 0 };
-  private pending: Pixel = { x: 1, y: 0 };
+  private turns: Pixel[] = [];
   init() {
     this.body = [
       { x: 6, y: 10 },
@@ -13,7 +14,7 @@ export class Snake extends BaseGame {
       { x: 3, y: 10 },
     ];
     this.direction = { x: 1, y: 0 };
-    this.pending = { ...this.direction };
+    this.turns = [];
     this.food = { x: 9, y: 6 };
   }
   private feed() {
@@ -30,9 +31,14 @@ export class Snake extends BaseGame {
   }
   step(dt: number) {
     this.tick += dt;
-    if (this.tick < Math.max(0.075, 0.24 - this.state.level * 0.014)) return;
-    this.tick = 0;
-    this.direction = { ...this.pending };
+    const rules = snakeRules[this.difficulty];
+    const interval = Math.max(
+      rules.minInterval,
+      rules.interval - this.state.level * rules.acceleration,
+    );
+    if (this.tick < interval) return;
+    this.tick -= interval;
+    this.direction = this.turns.shift() ?? this.direction;
     const head = {
       x: this.body[0].x + this.direction.x,
       y: this.body[0].y + this.direction.y,
@@ -52,7 +58,11 @@ export class Snake extends BaseGame {
     this.body.unshift(head);
     if (eat) {
       this.score(100);
-      this.state.level = 1 + Math.floor((this.body.length - 4) / 4);
+      this.state.level =
+        1 +
+        Math.floor(
+          (this.body.length - 4) / snakeRules[this.difficulty].foodPerLevel,
+        );
       this.feed();
     } else this.body.pop();
   }
@@ -64,8 +74,14 @@ export class Snake extends BaseGame {
       right: { x: 1, y: 0 },
     };
     const d = directions[input];
-    if (d && (d.x !== -this.direction.x || d.y !== -this.direction.y))
-      this.pending = d;
+    const last = this.turns.at(-1) ?? this.direction;
+    if (
+      d &&
+      this.turns.length < 2 &&
+      (d.x !== last.x || d.y !== last.y) &&
+      (d.x !== -last.x || d.y !== -last.y)
+    )
+      this.turns.push(d);
   }
   render(): GameFrame {
     return {

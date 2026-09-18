@@ -1,4 +1,4 @@
-# BRICKBOX
+# PIXCO
 
 **Tiny games. Big nostalgia.** Ten original, playable monochrome games in a functional virtual handheld. React + TypeScript + Vite, Canvas rendering, and Electron desktop packaging. No account, backend, ads, ROMs, external fonts, or sound samples.
 
@@ -50,7 +50,7 @@ Controllers use the D-pad / left stick, south/east action buttons, Start, and Se
 - Validated settings import/export and independent score/favorite/statistics resets.
 - Responsive sidebar, compact navigation, and mobile bottom navigation. Games move above the introductory copy on small screens.
 
-Browser data is in `localStorage['brickbox.v1']`. Scores and time are checkpointed every five seconds and when pausing, switching games, hiding, or closing. A sudden process kill can lose the last five seconds. Recent games launch a fresh round; there is no suspended-board restoration. “Games finished” counts rounds that reach game over. Maze is an endless series of completed mazes, recorded through score and level.
+Browser data is in `localStorage['pixco.v1']`. Scores and time are checkpointed every five seconds and when pausing, switching games, hiding, or closing. A sudden process kill can lose the last five seconds. Recent games launch a fresh round; there is no suspended-board restoration. “Games finished” counts rounds that reach game over. Maze is an endless series of completed mazes, recorded through score and level.
 
 Desktop data lives in Electron's platform-specific user-data directory, independently of browser data. Window geometry is saved in `window-state.json`. Settings export contains preferences and mappings, not score history. Optional API failures fall back to playable, in-memory operation; unavailable storage is shown in the UI.
 
@@ -63,7 +63,7 @@ npm run package:win:installer  # Windows NSIS installer
 npm run package:mac            # macOS DMG and ZIP, on macOS
 ```
 
-Artifacts are written to `release/`. Extract the Windows ZIP and run **Brickbox.exe**. On Linux, mark the AppImage executable if necessary and run it. Electron/Chromium must retain its sandbox in normal use; the automated runner supplies `--no-sandbox` only for its test process.
+Artifacts are written to `release/`. Extract the Windows ZIP and run **Pixco.exe**. On Linux, mark the AppImage executable if necessary and run it. Electron/Chromium must retain its sandbox in normal use; the automated runner supplies `--no-sandbox` only for its test process.
 
 The app includes an original icon, a native application menu, fullscreen shortcuts, single-instance behavior, saved window size, and explicit native hide/minimize/blur pause signals. The renderer has context isolation, no Node integration, a minimal preload bridge, denied permissions, and blocked external navigation/network requests. Production HTML also sets a Content Security Policy.
 
@@ -83,7 +83,7 @@ npm run test:desktop          # build first; briefly opens a native window
 node scripts/check-desktop.mjs --packaged # after Linux packaging
 ```
 
-Browser checks use `/usr/bin/brave` when present. Else install Playwright Chromium with `npx playwright install chromium`, or set `BRICKBOX_BROWSER` to another Chromium executable. `BRICKBOX_URL` overrides the test URL. Screenshots are saved under `/tmp/brickbox-*.png`. Desktop test storage is isolated under `/tmp/brickbox-native-check`.
+Browser checks use `/usr/bin/brave` when present. Else install Playwright Chromium with `npx playwright install chromium`, or set `PIXCO_BROWSER` to another Chromium executable. `PIXCO_URL` overrides the test URL. Screenshots are saved under `/tmp/pixco-*.png`. Desktop test storage is isolated under `/tmp/pixco-native-check`.
 
 The browser suite covers all ten games, keyboard input, pause/restart, persisted scores/favorites, search and categories, history, theme/mute settings, remapping, settings export and rejected imports, form-input isolation, desktop/tablet/mobile overflow, production offline reload, and missing optional APIs. Rendering was visually inspected at 1440, 768, and 390 pixels wide.
 

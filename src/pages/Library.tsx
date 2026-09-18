@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Icon } from "../components/Icon";
 import { GameCard } from "../components/GameCard";
 import { games } from "../games/registry";
-import { useStore } from "../storage/store";
+import { useStore, gameStats } from "../storage/store";
 import type { Page } from "../navigation";
 export function Library({
   page,
@@ -50,7 +50,7 @@ export function Library({
   if (sort === "score")
     filtered.sort(
       (a, b) =>
-        (data.stats[b.id]?.highScore ?? 0) - (data.stats[a.id]?.highScore ?? 0),
+        gameStats(data, b.id).highScore - gameStats(data, a.id).highScore,
     );
   const categories = ["All games", ...new Set(games.map((g) => g.category))];
   return (

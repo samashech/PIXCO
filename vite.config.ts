@@ -4,7 +4,7 @@ export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     {
-      name: "brickbox-content-policy",
+      name: "pixco-content-policy",
       transformIndexHtml() {
         if (command !== "build") return;
         return [

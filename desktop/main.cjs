@@ -35,7 +35,7 @@ function createWindow() {
     ...bounds,
     minWidth: 800,
     minHeight: 640,
-    title: "BRICKBOX — Tiny games. Big nostalgia.",
+    title: "PIXCO — Tiny games. Big nostalgia.",
     icon: path.join(__dirname, "../dist/icon.png"),
     backgroundColor: "#171918",
     show: false,
@@ -51,7 +51,7 @@ function createWindow() {
   for (const event of ["minimize", "hide", "blur"])
     mainWindow.on(event, () => {
       if (!mainWindow.webContents.isDestroyed())
-        mainWindow.webContents.send("brickbox:pause");
+        mainWindow.webContents.send("pixco:pause");
     });
   mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
   mainWindow.once("ready-to-show", () => {
@@ -90,7 +90,7 @@ function createWindow() {
     ...(process.platform === "darwin"
       ? [
           {
-            label: "Brickbox",
+            label: "Pixco",
             submenu: [
               { role: "about" },
               { type: "separator" },
@@ -123,7 +123,7 @@ function createWindow() {
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
-app.setName("Brickbox");
+app.setName("Pixco");
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.on("second-instance", () => {

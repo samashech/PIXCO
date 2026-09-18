@@ -1,3 +1,4 @@
+import { racingRules } from "./difficulty";
 import { BaseGame } from "./engine/base";
 import type { GameFrame, Input, Pixel } from "./engine/types";
 import { car, sprite } from "./engine/sprites";
@@ -16,12 +17,19 @@ export class Racing extends BaseGame {
     this.distance = 0;
   }
   step(dt: number) {
-    const speed = 5 + this.state.level * 0.75;
+    const rules = racingRules[this.difficulty];
+    const speed = rules.speed + this.state.level * rules.acceleration;
     this.road = (this.road + dt * speed) % 5;
     this.tick += dt;
     this.distance += dt * speed;
     for (const e of this.enemies) e.y += dt * speed;
-    if (this.tick > Math.max(0.5, 1.6 - this.state.level * 0.08)) {
+    if (
+      this.tick >
+      Math.max(
+        rules.minSpawn,
+        rules.spawn - this.state.level * rules.spawnProgress,
+      )
+    ) {
       this.tick = 0;
       this.enemies.push({ lane: Math.floor(Math.random() * 3), y: -4 });
     }
@@ -40,7 +48,7 @@ export class Racing extends BaseGame {
       }
       return true;
     });
-    this.state.level = 1 + Math.floor(this.state.score / 500);
+    this.state.level = 1 + Math.floor(this.state.score / rules.scorePerLevel);
   }
   input(input: Input) {
     if (input === "left") this.lane = Math.max(0, this.lane - 1);

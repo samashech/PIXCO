@@ -1,3 +1,4 @@
+import { memoryRules } from "./difficulty";
 import { BaseGame } from "./engine/base";
 import type { GameFrame, Input, Pixel } from "./engine/types";
 export class Memory extends BaseGame {
@@ -6,8 +7,17 @@ export class Memory extends BaseGame {
   showing = true;
   private flash = -1;
   private flashTime = 0;
+  private responseTime = 0;
+  get rules() {
+    return memoryRules[this.difficulty];
+  }
   init() {
-    this.sequence = [Math.floor(Math.random() * 4)];
+    this.state.lives = this.rules.lives;
+    this.sequence = Array.from({ length: this.rules.initialLength }, () =>
+      Math.floor(Math.random() * 4),
+    );
+    this.responseTime = 0;
+    this.flashTime = 0;
     this.index = 0;
     this.showing = true;
     this.flash = -1;
@@ -19,14 +29,27 @@ export class Memory extends BaseGame {
       this.flashTime -= dt;
       if (this.flashTime <= 0) this.flash = -1;
     }
+    if (!this.showing && this.rules.responseLimit) {
+      this.responseTime += dt;
+      if (this.responseTime >= this.rules.responseLimit) {
+        this.mistake();
+        return;
+      }
+    }
     if (this.showing) {
-      const index = Math.floor(this.tick / 0.7);
+      const period = this.rules.flash + this.rules.gap;
+      const index = Math.floor(this.tick / period);
       if (index >= this.sequence.length) {
         this.showing = false;
         this.flash = -1;
         this.index = 0;
+        this.responseTime = 0;
         this.tick = 0;
-      } else this.flash = this.tick % 0.7 < 0.48 ? this.sequence[index] : -1;
+      } else
+        this.flash =
+          this.tick >= 0 && this.tick % period < this.rules.flash
+            ? this.sequence[index]
+            : -1;
     }
   }
   input(input: Input) {
@@ -43,16 +66,10 @@ export class Memory extends BaseGame {
     this.flashTime = 0.25;
     this.sound("click");
     if (key !== this.sequence[this.index]) {
-      this.state.lives--;
-      this.sound("lose");
-      if (this.state.lives === 0) this.over();
-      else {
-        this.index = 0;
-        this.showing = true;
-        this.tick = -0.6;
-      }
+      this.mistake();
       return;
     }
+    this.responseTime = 0;
     this.index++;
     if (this.index === this.sequence.length) {
       this.score(this.sequence.length * 100);
@@ -61,6 +78,17 @@ export class Memory extends BaseGame {
       this.index = 0;
       this.showing = true;
       this.tick = -0.7;
+    }
+  }
+  private mistake() {
+    this.state.lives--;
+    this.sound("lose");
+    this.responseTime = 0;
+    if (this.state.lives === 0) this.over();
+    else {
+      this.index = 0;
+      this.showing = true;
+      this.tick = -0.6;
     }
   }
   render(): GameFrame {
@@ -87,7 +115,11 @@ export class Memory extends BaseGame {
       width: 14,
       height: 23,
       pixels,
-      label: this.showing ? "WATCH" : "REPEAT",
+      label: this.showing
+        ? "WATCH"
+        : this.rules.responseLimit
+          ? `REPEAT ${Math.ceil(this.rules.responseLimit - this.responseTime)}s`
+          : "REPEAT",
     };
   }
 }

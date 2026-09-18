@@ -1,3 +1,4 @@
+import { mazeRules } from "./difficulty";
 import { BaseGame } from "./engine/base";
 import type { GameFrame, Input, Pixel } from "./engine/types";
 export class Maze extends BaseGame {
@@ -5,13 +6,19 @@ export class Maze extends BaseGame {
   player: Pixel = { x: 1, y: 1 };
   goal: Pixel = { x: 13, y: 23 };
   private steps = 0;
+  get dimensions() {
+    return mazeRules[this.difficulty];
+  }
   init() {
+    this.goal = { x: this.dimensions.width - 2, y: this.dimensions.height - 2 };
     this.player = { x: 1, y: 1 };
     this.steps = 0;
     this.generate();
   }
   private generate() {
-    this.maze = Array.from({ length: 25 }, () => Array(15).fill(1));
+    this.maze = Array.from({ length: this.dimensions.height }, () =>
+      Array(this.dimensions.width).fill(1),
+    );
     const stack = [{ x: 1, y: 1 }];
     this.maze[1][1] = 0;
     while (stack.length) {
@@ -25,7 +32,11 @@ export class Maze extends BaseGame {
         .map((d) => ({ x: p.x + d.x, y: p.y + d.y }))
         .filter(
           (n) =>
-            n.x > 0 && n.x < 14 && n.y > 0 && n.y < 24 && this.maze[n.y][n.x],
+            n.x > 0 &&
+            n.x < this.dimensions.width - 1 &&
+            n.y > 0 &&
+            n.y < this.dimensions.height - 1 &&
+            this.maze[n.y][n.x],
         );
       if (options.length) {
         const n = options[Math.floor(Math.random() * options.length)];
@@ -50,7 +61,7 @@ export class Maze extends BaseGame {
       x: this.player.x + d[input]!.x,
       y: this.player.y + d[input]!.y,
     };
-    if (!this.maze[p.y]?.[p.x]) {
+    if (this.maze[p.y]?.[p.x] === 0) {
       this.player = p;
       this.steps++;
       this.sound("click");
@@ -74,6 +85,6 @@ export class Maze extends BaseGame {
       ...this.goal,
       shade: Math.floor(this.tick * 3) % 2 ? 0.2 : 1,
     });
-    return { width: 15, height: 25, pixels };
+    return { ...this.dimensions, pixels };
   }
 }

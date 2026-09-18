@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { applyAppearance } from "./themes/catalog";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Icon } from "./components/Icon";
 import { type GameCommand } from "./components/Handheld";
 import { GameCard } from "./components/GameCard";
@@ -12,12 +13,14 @@ import { Library } from "./pages/Library";
 import { Statistics } from "./pages/Statistics";
 import type { Page } from "./navigation";
 import "./styles/app.css";
+import "./themes/materials.css";
 export default function App() {
   const [page, setPage] = useState<Page>("home");
   const data = useStore();
   const game = getGame(data.selected);
   const command = useRef<GameCommand | null>(null);
-  useEffect(() => {
+  useLayoutEffect(() => {
+    applyAppearance(data.settings.appearance);
     synth.master = data.settings.master;
     synth.sfx = data.settings.sfx;
     synth.muted = data.settings.muted;
@@ -74,7 +77,7 @@ export default function App() {
                   ? "GOOD OLD GAMES. BRAND NEW HOME."
                   : page === "game"
                     ? `NOW SELECTED / GAME ${game.id}`
-                    : "THE BRICKBOX COLLECTION"}
+                    : "THE PIXCO COLLECTION"}
               </div>
               <h1>{title}</h1>
             </div>
