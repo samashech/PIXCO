@@ -58,6 +58,7 @@ Thumbs.db
 # Cache and temporary directories
 .cache/
 .vite/
+.vercel/
 *.tmp
 *.temp
 .eslintcache
